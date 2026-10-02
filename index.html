@@ -75,3 +75,32 @@
     </script>
 </body>
 </html>
+
+export default {
+  async fetch(request) {
+    // รับค่า Request URL แล้วดึงพารามิเตอร์ camid ออกมา (ค่าเริ่มต้น 1369)
+    const url = new URL(request.url);
+    const camId = url.searchParams.get('camid') || '1369';
+    
+    // สร้าง URL ไปยังเซิร์ฟเวอร์ กทม. พร้อมแนบ Timestamp กัน Cache
+    const targetUrl = `http://bmatraffic.com/show.aspx?image=${camId}&time=${Date.now()}`;
+
+    // สร้าง Request ใหม่และจำลอง Header ให้เหมือนว่าเปิดจากเว็บ bmatraffic
+    const modifiedRequest = new Request(targetUrl, {
+      method: 'GET',
+      headers: {
+        'Referer': 'http://bmatraffic.com/index.aspx',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    const response = await fetch(modifiedRequest);
+    
+    // อนุญาต CORS ให้หน้าเว็บของเราสามารถดึงภาพจาก Worker ไปแสดงผลได้
+    const newResponse = new Response(response.body, response);
+    newResponse.headers.set('Access-Control-Allow-Origin', '*');
+    newResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    
+    return newResponse;
+  }
+};
