@@ -104,3 +104,17 @@ export default {
     return newResponse;
   }
 };
+
+// เปลี่ยนตรงนี้เป็น URL ของ Cloudflare Worker ของคุณ
+const workerUrl = "https://cctv-bma.howdomedofile.workers.dev/";
+
+function updateCameras() {
+    const currentTime = new Date().getTime();
+    
+    // เรียกผ่าน Proxy พร้อมส่งรหัสกล้อง และต่อท้ายด้วย t=เวลาปัจจุบัน เพื่อบังคับรีเฟรชภาพ
+    document.getElementById('cam1369').src = workerUrl + "?camid=1369&t=" + currentTime;
+    document.getElementById('cam1194').src = workerUrl + "?camid=1194&t=" + currentTime;
+}
+
+updateCameras();
+setInterval(updateCameras, 60000);
